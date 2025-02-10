@@ -31,6 +31,8 @@ class GetFilteredAttributes
      */
     private EntityFieldChecker $entityFieldChecker;
 
+    private array $filteredAttributesCache = [];
+
     /**
      * @param AttributeRepository       $attributeRepository
      * @param SearchCriteriaBuilder     $searchCriteriaBuilder
@@ -56,6 +58,10 @@ class GetFilteredAttributes
      */
     public function execute(array $filterArgs, string $entityType): array
     {
+        $key = $this->getFilteredAttributesKey($filterArgs, $entityType);
+        if (isset($this->filteredAttributesCache[$key])) {
+            return $this->filteredAttributesCache[$key];
+        }
         $errors = [];
         foreach ($filterArgs as $field => $value) {
             if ($this->entityFieldChecker->fieldBelongToEntity(strtolower($entityType), $field)) {
@@ -79,9 +85,21 @@ class GetFilteredAttributes
 
         $attributesList = $this->attributeRepository->getList(strtolower($entityType), $searchCriteria)->getItems();
 
-        return [
+        $this->filteredAttributesCache[$key] = [
             'items' => $attributesList,
             'errors' => $errors
         ];
+
+        return $this->filteredAttributesCache[$key];
+    }
+
+    private function getFilteredAttributesKey(array $filterArgs, string $entityType): string
+    {
+        $key = $entityType;
+        foreach ($filterArgs as $field => $value) {
+            $key .= '_' . $field . '_' . $value;
+        }
+
+        return sha1($key);
     }
 }
