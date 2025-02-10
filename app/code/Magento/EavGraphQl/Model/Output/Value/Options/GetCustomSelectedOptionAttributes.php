@@ -32,7 +32,6 @@ class GetCustomSelectedOptionAttributes implements GetAttributeSelectedOptionInt
      */
     public function execute(string $entity, string $code, string $value): ?array
     {
-        \Magento\Framework\Profiler::start('Magento_EavGraphQl::GetCustomSelectedOptionAttributes::execute');
         $result = [];
         $selectedValues = explode(',', $value);
         $options = $this->getAttributeOptions($entity, $code);
@@ -44,7 +43,6 @@ class GetCustomSelectedOptionAttributes implements GetAttributeSelectedOptionInt
                 ];
             }
         }
-        \Magento\Framework\Profiler::stop('Magento_EavGraphQl::GetCustomSelectedOptionAttributes::execute');
 
         return $result;
     }
@@ -59,9 +57,6 @@ class GetCustomSelectedOptionAttributes implements GetAttributeSelectedOptionInt
      */
     private function getAttributeOptions(string $entity, string $code): array
     {
-        \Magento\Framework\Profiler::start(
-            'Magento_EavGraphQl::GetCustomSelectedOptionAttributes::getAttributeOptions'
-        );
         $attribute = $this->attributeRepository->get($entity, $code);
         $storeId = $attribute->getStoreId();
         if ($storeId === null) {
@@ -76,9 +71,6 @@ class GetCustomSelectedOptionAttributes implements GetAttributeSelectedOptionInt
             }
             $this->optionsCache[$entity][$storeId][$code] = $optionsLabel;
         }
-        \Magento\Framework\Profiler::stop(
-            'Magento_EavGraphQl::GetCustomSelectedOptionAttributes::getAttributeOptions'
-        );
 
         return $this->optionsCache[$entity][$storeId][$code];
     }
